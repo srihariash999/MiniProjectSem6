@@ -1,0 +1,41 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=fmtrans
+*Date=19:06:23
+*CreatedBy=Fritzing 0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;;;21.7494;-14.6505;-90;Bottom;MIC
+2;9V;;58.591;-21.0144;-180;Bottom;Batt
+3;;;21.1146;-40.3597;0;Bottom;TXT3
+4;;;53.4466;-43.5792;0;Bottom;TXT10
+5;100nF;100 mil [THT, multilayer];21.7342;-37.5395;0;Bottom;C1
+6;;;40.3082;-5.36578;0;Bottom;TXT1
+7;;;57.8703;-25.7184;0;Bottom;TXT13
+8;220;THT;61.1319;-42.5631;-90;Bottom;R2
+9;100nF;100 mil [THT, multilayer];61.1319;-31.1284;-90;Bottom;C3
+10;;;50.9883;-35.0023;0;Bottom;TXT9
+11;;;30.179;-19.0576;0;Bottom;TXT6
+12;;;24.1293;-32.3346;0;Bottom;TXT4
+13;;;34.8571;-49.0874;0;Bottom;TXT2
+14;100nF;100 mil [THT, multilayer];29.3741;-22.2705;180;Bottom;C2
+15;;DIP (Dual Inline);39.5419;-37.4831;0;Bottom;S.Trig
+16;;;76.7536;-45.3427;0;Bottom;IMG1
+17;;;25.0338;-12.2257;0;Bottom;TXT7
+18;;;63.881;-30.1646;90;Bottom;TXT12
+19;;5 mm [THT];53.4994;-48.3218;0;Bottom;LED1
+20;;THT;20.9874;-24.1475;0;Bottom;J2
+21;;;28.0994;-32.4305;0;Bottom;ANT1
+22;;;18.379;-28.6775;0;Bottom;TXT5
+23;;;40.6086;-12.0504;0;Bottom;TXT8
+24;;;63.8688;-42.6323;-90;Bottom;TXT11
+25;5V;to-220-alt;50.9594;-23.1341;0;Bottom;7805
+26;220;THT;40.811;-9.5844;-180;Bottom;R1
