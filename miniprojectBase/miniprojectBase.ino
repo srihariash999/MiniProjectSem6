@@ -13,10 +13,33 @@ PubSubClient client(espClient);
 long lastMsg = 0;
 char msg[50];
 int value = 0;
+int lenaddrSsid = 99;
+int lenaddrPass = 100;
+int ssidaddr = 101;
+int passaddr = 150;
+
+
 
 void setup_wifi() {
 
-  delay(10);
+
+int len = EEPROM.read(lenaddrSsid);
+
+for (int i =0; i<len; i++)
+{char n = EEPROM.read(ssidaddr+i);
+  ssid+=n ;
+}
+
+
+int len2 = EEPROM.read(lenaddrPass);
+
+for (int i =0; i<len2; i++)
+{char n2 = EEPROM.read(passaddr+i);
+  pass+=n2 ;
+}
+
+
+ delay(10);
   // We start by connecting to a WiFi network
   Serial.println();
   Serial.print("Connecting to ");
@@ -61,7 +84,7 @@ void reconnect() {
     if (client.connect(clientId.c_str())) {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish("srihari/outTopic", "hello world");
+
       // ... and resubscribe
       client.subscribe("srihari/inTopic");
     } else {
@@ -121,15 +144,16 @@ if(kill_switch == false)
   }
   client.loop();
 
-  long now = millis();
-  if (now - lastMsg > 2000) {
-    lastMsg = now;
-    ++value;
-    snprintf (msg, 50, "hello world #%ld", value);
+
+    String got = Serial.readString();
+    if(got.length() >0){
+    char pubBuff[50];
+    got.toCharArray(pubBuff,50);
+    snprintf (msg, 50, pubBuff);
     Serial.print("Publish message: ");
     Serial.println(msg);
     client.publish("srihari/outTopic", msg);
-  }
+    }
 
     }
   }
@@ -162,16 +186,42 @@ Serial.println(" ENter the SSID and password one after other in serial window to
  again: Serial.print("Enter the ssid: ");
   while(!Serial.available());
   p = Serial.readString();
+EEPROM.write(lenaddrSsid,p.length());
+EEPROM.commit();
+char buff[p.length()];
+for (int i =0; i<p.length(); i++)
+{
+  buff[i] = p[i];  
+}
 
-  ssid = p;
-  Serial.println(ssid);
+for (int i =0; i<p.length(); i++)
+{
+  EEPROM.write(ssidaddr+i,buff[i]);
+  EEPROM.commit();
+  
+}
+  Serial.println(p);
 
   Serial.print("Password please : ");
     while(!Serial.available());
-  p = Serial.readString();
-  pass= p;
-  Serial.println(pass);
+    p = Serial.readString();
 
+    
+EEPROM.write(lenaddrPass,p.length());
+EEPROM.commit();
+char buff2[p.length()];
+for (int i =0; i<p.length(); i++)
+{
+  buff2[i] = p[i];  
+}
+for (int i =0; i<p.length(); i++)
+{
+  EEPROM.write(passaddr+i,buff2[i]);
+  EEPROM.commit();
+  
+}
+
+Serial.println(p);
 
   Serial.println("Is the above entered info correct? To confirm enter 'yes' or 'no' to re-enter 'em");
     while(!Serial.available());
