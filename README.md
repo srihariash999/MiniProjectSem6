@@ -2,4 +2,8 @@
 Mini project files for Semester 6
 
 
-The aim of the project is to create a small FM transmitter which can be used as a 'spy-bug' and use the audio received using this module to apply speech processing on and determine who is talking in the room right now !
+The aim of the project is to create a stand-alone MQTT based chat- terminal. It is basically sending and recieving messages currently using free mqtt broker @ broker.mqtt-dashboard.com.
+
+It also has an LCD and a T9 style keypad interfaced to it to type and display the text.
+
+The to-and-fro chat is tested using mosquitto client, MQTT box and My MQTT android app. So far so good !
