@@ -3,11 +3,14 @@
 #include <LiquidCrystal.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
-
+#include <ESP8266HTTPClient.h>
 
 
 const char* mqtt_server = "broker.mqtt-dashboard.com";
 String ssid, pass;
+long long int prev =0;
+
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 long lastMsg = 0;
@@ -18,6 +21,14 @@ int lenaddrPass = 100;
 int ssidaddr = 101;
 int passaddr = 150;
 
+
+void boot_sequence(void);
+String get_time();
+void screensaver();
+
+LiquidCrystal lcd(D5, D6, D3, D2, D1, D0);
+
+bool kill_switch;
 
 
 void setup_wifi() {
@@ -44,7 +55,10 @@ for (int i =0; i<len2; i++)
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
-
+  lcd.clear();
+  lcd.print("Connecting to ");
+  lcd.setCursor(0,1);
+  lcd.println(ssid);
   WiFi.begin(ssid, pass);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -56,6 +70,8 @@ for (int i =0; i<len2; i++)
 
   Serial.println("");
   Serial.println("WiFi connected");
+  lcd.clear();
+  lcd.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 }
@@ -65,10 +81,16 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
+  lcd.begin(16, 2);
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("in:");
   for (int i = 0; i < length; i++) {
     Serial.print((char)payload[i]);
+        lcd.print((char)payload[i]);
   }
   Serial.println();
+  
 
 
 }
@@ -88,6 +110,8 @@ void reconnect() {
       // ... and resubscribe
       client.subscribe("srihari/inTopic");
     } else {
+      lcd.clear();
+      lcd.print("Disconnected.. wait, trying again !");
       Serial.print("failed, rc=");
       Serial.print(client.state());
       Serial.println(" try again in 5 seconds");
@@ -97,12 +121,16 @@ void reconnect() {
   }
 }
 
-void boot_sequence(void);
-
-LiquidCrystal lcd(D5, D6, D3, D2, D1, D0);
-bool kill_switch;
 
 
+void welcome_screen()
+{
+  lcd.clear();
+
+  lcd.print("Wlcm to chat 1.0");
+  lcd.setCursor(0,1);
+  lcd.print("By hari&ravi '19");
+}
 
 
 
@@ -110,16 +138,18 @@ void setup() {
 
   pinMode(D4,OUTPUT);
   analogWrite(D4, 200);
-  
+  lcd.begin(16, 2);
    attachInterrupt(digitalPinToInterrupt(D7), IntCallback, FALLING);
    Serial.begin(115200);
-  lcd.begin(16, 2);
+  
 
   EEPROM.begin(512);
   kill_switch = EEPROM.read(108);
 
     client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
+  welcome_screen();
+  delay(3000);
  
 }
 
@@ -129,10 +159,7 @@ void setup() {
 void loop() {
 
 if(kill_switch == false)
-{ lcd.clear();
-  lcd.setCursor(0, 1);
-
-  lcd.print("Application      ");
+{ screensaver();
    setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
@@ -140,12 +167,20 @@ if(kill_switch == false)
   {
     if(kill_switch == false){
   if (!client.connected()) {
+        lcd.setCursor(0,1);
+    lcd.print("MQTT NOT OK !");
     reconnect();
+  }
+  if(client.connected())
+  {
+    lcd.setCursor(0,1);
+    lcd.print("Conn. to MQTT OK !");
   }
   client.loop();
 
 
     String got = Serial.readString();
+   screensaver();
     if(got.length() >0){
     char pubBuff[50];
     got.toCharArray(pubBuff,50);
@@ -153,6 +188,13 @@ if(kill_switch == false)
     Serial.print("Publish message: ");
     Serial.println(msg);
     client.publish("srihari/outTopic", msg);
+
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("out:");
+    lcd.print(msg);
+
+    
     }
 
     }
@@ -184,6 +226,8 @@ void boot_sequence()
 Serial.println(" ENter the SSID and password one after other in serial window to setup");
 
  again: Serial.print("Enter the ssid: ");
+ lcd.clear();
+        lcd.print("Enter the ssid: ");
   while(!Serial.available());
   p = Serial.readString();
 EEPROM.write(lenaddrSsid,p.length());
@@ -202,7 +246,9 @@ for (int i =0; i<p.length(); i++)
 }
   Serial.println(p);
 
-  Serial.print("Password please : ");
+  Serial.print("Password: ");
+  lcd.clear();
+    lcd.print("Password: ");
     while(!Serial.available());
     p = Serial.readString();
 
@@ -251,7 +297,9 @@ Serial.println(p);
        kill_switch = !kill_switch;
        EEPROM.write(108, kill_switch);
        EEPROM.commit();
+       
   delay(3000);
+  welcome_screen();
   
 
   
@@ -259,9 +307,51 @@ Serial.println(p);
 }
 
 
+
+String get_time()
+{
+  String samay;
+HTTPClient http;  //Declare an object of class HTTPClient
+http.begin("http://api.thingspeak.com/apps/thinghttp/send_request?api_key=18OGDYOI5VV43ED8");  //Specify request destination
+int httpCode = http.GET();                                                                  //Send the request
+ 
+if (httpCode > 0) { //Check the returning code
+ 
+  samay = http.getString();   //Get the request response payload
+
+samay.trim();
+}
+ 
+http.end();   //Close connection
+
+return samay;
+}
+
+
+
+
 void IntCallback()
 {
+
+    
+  
   kill_switch = !kill_switch;
          EEPROM.write(108, kill_switch);
        EEPROM.commit();
+
+}
+
+
+
+void screensaver()
+{
+  uint32_t now = millis();
+  if (now - prev > 15000)
+  {
+    lcd.clear();
+    String t = get_time();
+    lcd.print(t);
+    prev = now;
+  }
+  
 }
