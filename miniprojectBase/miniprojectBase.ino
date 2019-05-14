@@ -9,7 +9,7 @@
 const char* mqtt_server = "broker.mqtt-dashboard.com";
 String ssid, pass;
 long long int prev =0;
-
+String msg_buff;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -20,7 +20,7 @@ int lenaddrSsid = 99;
 int lenaddrPass = 100;
 int ssidaddr = 101;
 int passaddr = 150;
-
+char pub_buff[50];
 
 void boot_sequence(void);
 String get_time();
@@ -89,6 +89,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print((char)payload[i]);
         lcd.print((char)payload[i]);
   }
+  prev = millis();
   Serial.println();
   
 
@@ -132,7 +133,7 @@ void welcome_screen()
   lcd.print("By hari&ravi '19");
 }
 
-
+   int count = 0;
 
 void setup() {
 
@@ -140,6 +141,7 @@ void setup() {
   analogWrite(D4, 200);
   lcd.begin(16, 2);
    attachInterrupt(digitalPinToInterrupt(D7), IntCallback, FALLING);
+    attachInterrupt(digitalPinToInterrupt(D8), enter, RISING);
    Serial.begin(115200);
   
 
@@ -159,12 +161,14 @@ void setup() {
 void loop() {
 
 if(kill_switch == false)
-{ screensaver();
+{ 
+  screensaver();
    setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
   while(1)
   {
+ 
     if(kill_switch == false){
   if (!client.connected()) {
         lcd.setCursor(0,1);
@@ -174,26 +178,20 @@ if(kill_switch == false)
   if(client.connected())
   {
     lcd.setCursor(0,1);
-    lcd.print("Conn. to MQTT OK !");
+    lcd.print("MQTT ok!");
+ 
   }
   client.loop();
 
 
-    String got = Serial.readString();
+
    screensaver();
+  String got = Serial.readString();
     if(got.length() >0){
-    char pubBuff[50];
-    got.toCharArray(pubBuff,50);
-    snprintf (msg, 50, pubBuff);
-    Serial.print("Publish message: ");
-    Serial.println(msg);
-    client.publish("srihari/outTopic", msg);
-
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print("out:");
-    lcd.print(msg);
-
+        msg_buff+= got;
+        lcd.clear();
+        lcd.print(msg_buff);
+    
     
     }
 
@@ -346,7 +344,7 @@ void IntCallback()
 void screensaver()
 {
   uint32_t now = millis();
-  if (now - prev > 15000)
+  if (now - prev > 30000)
   {
     lcd.clear();
     String t = get_time();
@@ -354,4 +352,18 @@ void screensaver()
     prev = now;
   }
   
+}
+
+
+void enter()
+{
+     msg_buff.toCharArray(pub_buff,50);
+    snprintf (msg, 50, pub_buff);
+    Serial.print("Publish message: ");
+    Serial.println(msg);
+    client.publish("srihari/outTopic", msg);
+    lcd.clear();
+    lcd.print("out: ");
+    lcd.print(msg);
+  msg_buff = "";
 }

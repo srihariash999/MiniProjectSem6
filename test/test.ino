@@ -24,7 +24,7 @@ void loop()
 
   while(Serial.available())
   {
-    p+= Serial.read();
+    p+= Serial.readString();
   }
   
 }
@@ -34,4 +34,5 @@ void IntCallback()
 {
 
    Serial.println(p);
+   p = "";
 }
